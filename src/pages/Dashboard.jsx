@@ -7,7 +7,6 @@ const Dashboard = () => {
   const [nftSummary, setNftSummary] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // ดึงข้อมูล address จาก localStorage
   useEffect(() => {
     const storedAddress = localStorage.getItem("userAddress");
     if (storedAddress) {
@@ -17,7 +16,6 @@ const Dashboard = () => {
     }
   }, []);
 
-  // ดึงข้อมูล NFTs และสร้างสรุป
   useEffect(() => {
     const fetchNFTSummary = async () => {
       if (!address) return;
@@ -60,14 +58,15 @@ const Dashboard = () => {
     setAddress(null);
     setNftSummary(null);
   };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <Layout isLoggedIn={!!address} onLogout={handleLogout}>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <header className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">NFT Dashboard</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Certificate Dashboard</h1>
             <p className="text-gray-600 mt-2">
-              Overview of your NFT portfolio and collections.
+              Overview of your Certificate portfolio and collections.
             </p>
           </header>
 
@@ -76,9 +75,9 @@ const Dashboard = () => {
               Loading...
             </div>
           ) : nftSummary ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="bg-gradient-to-br from-primary-light/10 to-white p-6 rounded-lg shadow">
-                <h2 className="text-lg font-semibold text-gray-900">Total NFTs</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Total Certificate</h2>
                 <p className="text-3xl font-bold text-primary">
                   {nftSummary.totalNFTs}
                 </p>
@@ -118,6 +117,5 @@ const Dashboard = () => {
     </div>
   );
 };
-
 
 export default Dashboard;

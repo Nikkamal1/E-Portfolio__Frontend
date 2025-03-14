@@ -9,6 +9,7 @@ const EditProfile = () => {
     education: "",
     workExperience: "",
     skills: "",
+    portfolio: "",
     awards: "",
   });
   const [address, setAddress] = useState(null);
@@ -33,7 +34,7 @@ const EditProfile = () => {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/profile?address=${address}`
+          `http://47.129.238.41:3000/api/profile?address=${address}`
         );
         if (!response.ok) {
           throw new Error(`Failed to fetch profile: ${response.statusText}`);
@@ -51,6 +52,7 @@ const EditProfile = () => {
             education: matchedProfile.education || "",
             workExperience: matchedProfile.workExperience || "",
             skills: matchedProfile.skills || "",
+            portfolio: matchedProfile.portfolio || "",
             awards: matchedProfile.awards || "",
           });
         }
@@ -72,7 +74,7 @@ const EditProfile = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/profile", {
+      const response = await fetch("http://47.129.238.41:3000/api/profile", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -94,84 +96,72 @@ const EditProfile = () => {
 
   return (
     <Layout isLoggedIn={!!address}>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50 py-10">
-        <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-6">
-            Edit Profile
-          </h1>
+      <div className="min-h-screen py-10 px-4 bg-gradient-to-br from-gray-50 to-purple-50">
+        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+          <h1 className="text-2xl font-semibold text-gray-800 mb-6">Edit Profile</h1>
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700">
-                Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={profile.name}
-                onChange={handleChange}
-                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700">
-                Bio
-              </label>
-              <textarea
-                name="bio"
-                value={profile.bio}
-                onChange={handleChange}
-                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700">
-                Education
-              </label>
-              <input
-                type="text"
-                name="education"
-                value={profile.education}
-                onChange={handleChange}
-                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700">
-                Work Experience
-              </label>
-              <input
-                type="text"
-                name="workExperience"
-                value={profile.workExperience}
-                onChange={handleChange}
-                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700">
-                Skills (comma-separated)
-              </label>
-              <input
-                type="text"
-                name="skills"
-                value={profile.skills}
-                onChange={handleChange}
-                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700">
-                Awards
-              </label>
-              <input
-                type="text"
-                name="awards"
-                value={profile.awards}
-                onChange={handleChange}
-                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-              />
-            </div>
+            <input
+              type="text"
+              placeholder="Enter your name"
+              name="name"
+              value={profile.name}
+              onChange={handleChange}
+              className="w-full border p-3 rounded-md focus:ring-primary focus:border-primary"
+            />
+
+            <textarea
+              placeholder="Tell us about yourself"
+              name="bio"
+              value={profile.bio}
+              onChange={handleChange}
+              className="w-full border p-3 rounded-md resize-none h-24 focus:ring-primary focus:border-primary"
+            />
+
+            <input
+              type="text"
+              placeholder="Enter your education details"
+              name="education"
+              value={profile.education}
+              onChange={handleChange}
+              className="w-full border p-3 rounded-md focus:ring-primary focus:border-primary"
+            />
+
+            <textarea
+              placeholder="Enter your work experience (Each line starts with '●')"
+              name="workExperience"
+              value={profile.workExperience}
+              onChange={handleChange}
+              className="w-full border p-3 rounded-md resize-none h-24 focus:ring-primary focus:border-primary"
+            />
+
+            <input
+              type="text"
+              placeholder="Enter your skills (separate with commas)"
+              name="skills"
+              value={profile.skills}
+              onChange={handleChange}
+              className="w-full border p-3 rounded-md focus:ring-primary focus:border-primary"
+            />
+
+            <input
+              type="text"
+              placeholder="Enter your portfolio links"
+              name="portfolio"
+              value={profile.portfolio}
+              onChange={handleChange}
+              className="w-full border p-3 rounded-md focus:ring-primary focus:border-primary"
+            />
+
+            <input
+              type="text"
+              placeholder="Enter any awards you've received"
+              name="awards"
+              value={profile.awards}
+              onChange={handleChange}
+              className="w-full border p-3 rounded-md focus:ring-primary focus:border-primary"
+            />
           </div>
+
           <div className="mt-6 flex justify-end space-x-4">
             <button
               onClick={() => navigate("/profile")}
@@ -182,7 +172,7 @@ const EditProfile = () => {
             <button
               onClick={handleSave}
               disabled={loading}
-              className="px-4 py-2 bg-primary text-white rounded-md"
+              className="px-4 py-2 bg-blue-500 text-white rounded-md"
             >
               {loading ? "Saving..." : "Save"}
             </button>

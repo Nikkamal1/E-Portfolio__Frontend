@@ -1,39 +1,46 @@
-import { useState } from "react";
-import Navbar from "./Navbar"; // ตรวจสอบเส้นทาง
-import PropTypes from "prop-types"; // ใช้สำหรับตรวจสอบ prop types
+import { useState, useEffect } from "react";
+import Navbar from "./Navbar";
+import PropTypes from "prop-types";
 import Sidebar from "./Sidebar";
+import Navbar1 from "./Navdepa";
+import Navdepa from "./Navdepa";
 
 const Layout = ({ children, isLoggedIn, profile, onLogout }) => {
-  const [sideMenuIsExpand, setSideMenuIsExpand] = useState(true);
+  const [sideMenuIsExpand, setSideMenuIsExpand] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+        setSideMenuIsExpand(prev => window.innerWidth >= 768 ? prev : false);
+    };
+
+    handleResize(); // ตรวจสอบขนาดหน้าจอเมื่อโหลดครั้งแรก
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+}, []);
+
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-b from-primary/5 to-secondary/5">
-      {/* แสดง Sidebar เฉพาะเมื่อมีการล็อกอิน */}
-      { <Sidebar setExpand={setSideMenuIsExpand} />}
-      <div
-        className={`flex-1 min-h-screen mx-0 bg-slate-100 transition-all duration-300 ease-in-out ${
-          sideMenuIsExpand ? "md:ml-72" : "md:ml-20"
-        }`}
-      >
-        <div className="flex-1">
-          {/* Navbar */}
-          <Navbar
+<div className="min-h-screen w-full flex bg-gradient-to-br from-gray-50 to-purple-50">
+{/* Sidebar */}
+    <Sidebar setExpand={setSideMenuIsExpand} />
+
+    {/* Main Content */}
+    <div className={`flex-1 min-h-screen transition-all duration-300 ${sideMenuIsExpand ? "pl-72" : "pl-20"}`}>
+        <Navdepa />
+        <Navbar
             isLoggedIn={isLoggedIn}
             profile={profile}
             onLogout={onLogout}
             onSettings={() => console.log("Settings clicked")}
-          />
-          {/* Children Content */}
-          <div className="container mx-auto px-4 py-20 h-[calc(100vh-5rem)] overflow-auto">
+        />
+        <div className="container mx-auto   overflow-auto">
             {children || <p>No content available</p>}
-          </div>
         </div>
-      </div>
     </div>
+</div>
   );
 };
 
-// ตรวจสอบประเภทของ props
 Layout.propTypes = {
   children: PropTypes.node,
   isLoggedIn: PropTypes.bool.isRequired,
@@ -44,7 +51,6 @@ Layout.propTypes = {
   onLogout: PropTypes.func.isRequired,
 };
 
-// เพิ่มค่า Default Props
 Layout.defaultProps = {
   profile: {
     name: "Guest",

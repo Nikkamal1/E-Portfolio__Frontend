@@ -2,26 +2,26 @@ const sidebarStructure = [
   {
     id: "dashboard",
     title: "Dashboard",
-    name: "Das",
+    name: "Dashboard",
     parent: true,
     icon: "dasbor",
     link: "/"
   },
   {
-    id: "dashboard1",
-    title: "NFTs",
-    name: "Daqs",
+    id: "certificate",
+    title: "Certificate",
+    name: "Cert",
     parent: true,
-    icon: "dashboard1",
-    link: "/nfts"
+    icon: "certificate",
+    link: "/certificate"
   },
   {
     id: "profile",
     title: "Profile",
-    name: "Daws",
+    name: "Profile",
     parent: true,
-    icon: "perusahaan",
+    icon: "profile",
     link: "/profile"
-  }
+  },
 ];
 export { sidebarStructure };

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import NFTDetailsModal from ".//NFTDetailsModal"; // คอมโพเนนต์ใหม่ที่เราจะสร้าง
+import NFTDetailsModal from "./NFTDetailsModal"; // คอมโพเนนต์ใหม่ที่เราจะสร้าง
 
 export const NFTGrid = ({ nfts = [], loading }) => {
   const [selectedNFT, setSelectedNFT] = useState(null);
@@ -37,14 +37,14 @@ export const NFTGrid = ({ nfts = [], loading }) => {
         {nfts.map((nft, index) => (
           <div
             key={nft.id || `${nft.name}-${nft.collection}-${index}`}
-            className="overflow-hidden transition-transform duration-300 hover:-translate-y-1 cursor-pointer animate-fade-in border rounded-lg shadow-md"
+            className="overflow-hidden transition-transform duration-300 hover:-translate-y-5 cursor-pointer animate-fade-in border rounded-lg shadow-md"
             onClick={() => handleCardClick(nft)} // เพิ่มคลิกการ์ด
           >
             <div className="aspect-square">
               <img
                 src={nft.image}
                 alt={nft.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 onError={(e) => {
                   e.target.src = "/placeholder.svg";
                 }}
@@ -61,7 +61,6 @@ export const NFTGrid = ({ nfts = [], loading }) => {
           </div>
         ))}
       </div>
-      {/* แสดง Modal เมื่อคลิก NFT */}
       {selectedNFT && (
         <NFTDetailsModal nft={selectedNFT} onClose={() => setSelectedNFT(null)} />
       )}

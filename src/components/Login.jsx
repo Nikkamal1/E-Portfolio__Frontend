@@ -26,13 +26,14 @@ const Login = ({ onConnect }) => {
   };
 
   return (
-    <div className="text-center">
+    <div className="text-center mt-16">
+      
       {/* ปุ่ม Connect Wallet */}
       <ConnectWallet onConnect={handleConnect} />
 
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed bottom-4 right-4 max-w-sm p-4 rounded-lg shadow-lg bg-green-500 text-white">
+        <div className="fixed bottom-4  right-4 max-w-sm p-4 rounded-lg shadow-lg bg-green-500 text-white">
           <h4 className="font-bold">{toast.title}</h4>
           <p>{toast.description}</p>
         </div>

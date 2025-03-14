@@ -4,11 +4,21 @@ import Layout from "../components/Layout";
 import ProfileSection from "../components/ProfileSection";
 import { fetchNFTsForOwner } from "../services/nftService";
 
-const Index = () => {
-  const [address, setAddress] = useState(localStorage.getItem("userAddress"));
+const Certificate = () => {
+  const [address, setAddress] = useState(null); // ตั้งค่าเริ่มต้นเป็น null
   const [nfts, setNfts] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // ดึงข้อมูล address จาก localStorage เมื่อหน้าโหลดใหม่
+  useEffect(() => {
+    const storedAddress = localStorage.getItem("userAddress");
+    if (storedAddress) {
+      setAddress(storedAddress);
+    } else {
+      navigate("/login"); // ถ้าไม่มี address ให้ไปที่หน้าล็อกอิน
+    }
+  }, [navigate]);  // เพิ่ม navigate เป็น dependency เพื่อให้การเปลี่ยนเส้นทางถูกต้อง
 
   const fetchNFTs = async (userAddress) => {
     setLoading(true);
@@ -46,4 +56,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Certificate;

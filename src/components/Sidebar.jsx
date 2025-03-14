@@ -1,42 +1,45 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
-import { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 import { sidebarStructure } from "./structure";
 import generateIcon from "./generateIcon";
 
 const Sidebar = ({ setExpand }) => {
-    //   const username = "Miles Heizer";
-    //   const company = "Unilever";
-    //   const profilePic =
-    //     "https://img.mbizweb.id/180x180/erp/R2p1IXoyVEpBMk01WOEAdaI3hHVlkuIg0wW5_pn-CJCKHSrA_n1-U1tfE7Bl5H4_4Z7AxgL0DPOmUCdPuCHHC5lWvMU5Ig3t1uDrkVN53MlWlnA";
-    //   const link = "/";
-
     const [openedMenu, setOpenedMenu] = useState({});
     const [activeName, setActiveName] = useState("");
-    const [isExpand, setIsExpand] = useState(true);
-    const [isExpandOnHover, setIsExpandOnHover] = useState(false);
-
+    const [isExpand, setIsExpand] = useState(false);
     const listRef = useRef({});
+    const navigate = useNavigate();
+    const location = useLocation();
 
-    const activeLink = window.location.pathname;
+    useEffect(() => {
+        const handleResize = () => {
+            setIsExpand(prev => window.innerWidth >= 768 ? prev : false);
+            setExpand(prev => window.innerWidth >= 768 ? prev : false);
+        };
+    
+        handleResize(); // ตรวจสอบขนาดหน้าจอเมื่อโหลดครั้งแรก
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+    
+    
+    useEffect(() => {
+        const currentItem = sidebarStructure.find((item) =>
+            location.pathname === item.link
+        );
 
-    const handleHoverExpand = (value) => {
-        if (!isExpand) {
-            setIsExpandOnHover(value);
+        if (currentItem) {
+            setActiveName(currentItem.name);
         }
-    };
-
-    const handleNavigate = (name) => {
-        setActiveName(name);
-    };
+    }, [location.pathname]);
 
     const handleToggle = (name) => {
         const rootEl = name.split(".")[0];
-
         setOpenedMenu((prevState) => {
             const isOpened = prevState[name]?.open || false;
-            const updatedState = {
+            return {
                 ...prevState,
                 [name]: {
                     open: !isOpened,
@@ -47,19 +50,15 @@ const Sidebar = ({ setExpand }) => {
                     height: `${(listRef.current[rootEl]?.scrollHeight || 0) + (isOpened ? -listRef.current[name]?.scrollHeight : listRef.current[name]?.scrollHeight || 0)}px`,
                 },
             };
-            return updatedState;
         });
     };
 
     const generateMenu = (item, index, recursive = 0) => {
-        if (activeName === "" && activeLink.includes(item.link)) {
-            setActiveName(item.name);
-        }
         const isActive = activeName === item.name || activeName.split(".")[0] === item.name;
         const paddingClass = recursive === 0 ? "pl-4" : recursive === 1 ? "pl-11" : "pl-16";
-
+    
         return (
-            <li key={index}>
+            <li key={index} className="relative group">
                 <a
                     role="button"
                     tabIndex={0}
@@ -68,7 +67,7 @@ const Sidebar = ({ setExpand }) => {
                         if ("child" in item) {
                             handleToggle(item.name);
                         } else if (item.link) {
-                            window.location.href = item.link; // ใช้เปลี่ยน path
+                            navigate(item.link);
                         }
                     }}
                     onKeyDown={(event) => {
@@ -76,31 +75,19 @@ const Sidebar = ({ setExpand }) => {
                             if ("child" in item) {
                                 handleToggle(item.name);
                             } else if (item.link) {
-                                window.location.href = item.link;
+                                navigate(item.link);
                             }
                         }
                     }}
                     className={[
-                        "group flex cursor-pointer rounded-lg items-center justify-between h-12 py-0 pr-3 mb-1 focus:outline-none",
+                        "group-hover:bg-slate-300/20 group-hover:text-blue-600 flex cursor-pointer rounded-lg items-center justify-between h-12 py-0 pr-3 mb-1 focus:outline-none",
                         paddingClass,
-                        isActive ? "text-blue-600 font-semibold bg-blue-200/20" : "text-slate-500 hover:bg-slate-300/20",
+                        isActive ? "text-blue-600 font-semibold bg-blue-200/20" : "text-slate-500",
                     ].join(" ")}
                 >
                     <div className="flex items-center gap-3">
-                        {item.icon &&
-                            (item.icon === "dasdor" ? (
-                                <div className="h-3 w-3 flex items-center justify-center">
-                                    <div
-                                        className={`${isActive ? "h-2 w-2" : "h-1 w-1"} bg-current rounded-full duration-200`}
-                                    ></div>
-                                </div>
-                            ) : (
-                                generateIcon(item.icon)
-                            ))}
-                        <div
-                            className={`truncate ${isExpand || isExpandOnHover ? "" : "w-0 h-0 opacity-0"
-                                }`}
-                        >
+                        {item.icon && generateIcon(item.icon)}
+                        <div className={`truncate ${isExpand ? "" : "w-0 h-0 opacity-0"}`}>
                             {item.title}
                         </div>
                     </div>
@@ -122,8 +109,9 @@ const Sidebar = ({ setExpand }) => {
                 {"child" in item && (
                     <ul
                         ref={(el) => (listRef.current[item.name] = el)}
-                        className={`overflow-hidden duration-300 ease-in-out ${isExpand || isExpandOnHover ? "" : "h-0"
-                            }`}
+                        className={`absolute left-full top-0 z-50 bg-white shadow-lg border rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                            isExpand ? "" : "w-48"
+                        }`}
                         style={{ maxHeight: openedMenu[item.name]?.height || "0px" }}
                     >
                         {item.child.map((value, idx) => generateMenu(value, idx, recursive + 1))}
@@ -132,23 +120,24 @@ const Sidebar = ({ setExpand }) => {
             </li>
         );
     };
+    
 
     return (
         <nav
-            role="navigation"
-            className={`bg-slate-50 border-r border-slate-100 shadow-sm absolute inset-y-0 left-0 duration-300 ease-in-out ${isExpand
-                    ? "w-72"
-                    : isExpandOnHover
-                        ? "w-72 backdrop-blur-md"
-                        : "w-20"
-                }`}
-        >
+        role="navigation"
+        className={`bg-slate-50 border-r border-slate-100 shadow-sm fixed inset-y-0 left-0 duration-300 ease-in-out transition-all ${
+            isExpand ? "w-72" : "w-20"
+        }`}
+    >
+    
             <button
                 className="absolute z-50 top-16 -right-3 bg-white hover:bg-slate-100 text-slate-500 p-0.5 rounded-full border border-slate-200"
                 onClick={() => {
-                    setIsExpand(!isExpand);
-                    setExpand(!isExpand);
+                    setIsExpand(prev => !prev);
+                    setExpand(prev => !prev);
                 }}
+                
+                
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -163,42 +152,11 @@ const Sidebar = ({ setExpand }) => {
                     />
                 </svg>
             </button>
-            <div
-                onMouseEnter={() => handleHoverExpand(true)}
-                onMouseLeave={() => handleHoverExpand(false)}
-                className="relative h-screen overflow-hidden"
-            >
+            <div className="relative h-screen overflow-hidden">
                 <SimpleBar style={{ height: "100%" }} autoHide timeout={100}>
-                    <div className="text-slate-500">
-                        {/* <div className="my-8 flex flex-col items-center h-44">
-              <a href={link} className="flex flex-col items-center">
-                <div
-                  className={`rounded-full border-4 border-white overflow-hidden duration-300 ${
-                    isExpand || isExpandOnHover ? "h-28 w-28" : "h-12 w-12"
-                  }`}
-                >
-                  <img src={profilePic} className="block" alt="Profile" />
-                </div>
-                <div
-                  className={`text-base font-semibold text-slate-700 mt-3 duration-300 ${
-                    isExpand || isExpandOnHover ? "" : "opacity-0"
-                  }`}
-                >
-                  {username}
-                </div>
-                <div
-                  className={`text-sm text-slate-500 duration-300 ${
-                    isExpand || isExpandOnHover ? "" : "opacity-0"
-                  }`}
-                >
-                  {company}
-                </div>
-              </a>
-            </div> */}
-                        <ul className="mt-20 mb-10 p-0 list-none text-sm font-normal px-3">
-                            {sidebarStructure.map((item, index) => generateMenu(item, index))}
-                        </ul>
-                    </div>
+                    <ul className="mt-20 mb-10 p-0 list-none text-sm font-normal px-3">
+                        {sidebarStructure.map((item, index) => generateMenu(item, index))}
+                    </ul>
                 </SimpleBar>
             </div>
         </nav>

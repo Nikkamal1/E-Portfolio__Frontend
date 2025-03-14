@@ -1,63 +1,60 @@
-// ฟังก์ชันหลักสำหรับดึงข้อมูล NFTs ของเจ้าของ
 export const fetchNFTsForOwner = async (address) => {
   try {
-    // ดึงข้อมูลจาก Alchemy API เพื่อรับข้อมูล NFTs
     const response = await fetch(
       `https://base-mainnet.g.alchemy.com/v2/DWcwxgYIUU3nxQRioRQb0JhXMxFph4vN/getNFTsForOwner?owner=${address}`
     );
     const data = await response.json();
 
-    console.log("Fetched NFT data:", data); // ตรวจสอบข้อมูลที่ได้รับ
+    console.log("Fetched NFT data:", data);
 
-    // การ map ข้อมูล NFT เพื่อดึงข้อมูลที่จำเป็น
     const nftDetails = await Promise.all(
       (data.ownedNfts || []).map(async (nft) => {
         let collectionName = nft.contractMetadata?.name || "Unknown Collection";
 
-        // ลองดึงชื่อ Collection จาก OpenSea หากไม่พบใน metadata
         if (!collectionName) {
           collectionName = await fetchCollectionName(nft.contract.address);
         }
 
-        // หากยังไม่พบ ลองดึงจาก metadata โดยตรง
         if (!collectionName && nft.metadata) {
           collectionName = nft.metadata.name || "Unnamed NFT";
         }
 
-        // คืนค่าข้อมูล NFT ที่จัดเตรียมแล้ว
+        const description = nft.metadata?.description || "No description available";
+        const properties = nft.metadata?.attributes || "Not specified";
+        const image = nft.media && nft.media[0]?.gateway
+          ? nft.media[0]?.gateway
+          : nft.metadata?.image || "/placeholder.svg";
+
+        const tokenId = nft.id.tokenId;
+        const contractAddress = nft.contract.address;
+
         return {
-          id: `${nft.contract.address}-${nft.id.tokenId}`,
-          name: nft.title || nft.metadata?.name || `Token #${nft.id.tokenId}`,
-          image: nft.media[0]?.gateway || nft.metadata?.image || "/placeholder.svg",
+          id: `${contractAddress}-${tokenId}`,
+          name: nft.title || nft.metadata?.name || `Token #${tokenId}`,
+          image: image,
           collection: collectionName,
-          owner: address, // เจ้าของที่ระบุ
-          contractAddress: nft.contract.address,
+          owner: address,
+          contractAddress,
           creator: nft.contractMetadata?.deployedBy || nft.metadata?.creator || "Unknown Creator",
-          classification: "Off-Chain (IPFS)", // ระบุการจัดประเภทเป็น Off-Chain (IPFS) หรือแบบอื่น
-          tokenId: nft.id.tokenId,
-          tokenStandard: nft.id.tokenMetadata?.tokenType || "ERC-721",
+          properties,
+          description,
+          tokenId,
+          link: `https://basescan.org/nft/${contractAddress}/${parseInt(tokenId, 16)}`,
         };
       })
     );
-
-    return nftDetails; // คืนค่าข้อมูล NFT ที่จัดเตรียมแล้ว
-  } catch (error) {
-    console.error("Failed to fetch NFTs", error); // หากเกิดข้อผิดพลาดในการดึงข้อมูล
-    return []; // คืนค่าข้อมูลเป็น array ว่าง
-  }
-};
-
-// ฟังก์ชันเสริมเพื่อดึงชื่อ Collection จาก OpenSea
-const fetchCollectionName = async (contractAddress) => {
-  try {
-    // ใช้ OpenSea API เพื่อดึงข้อมูลจาก Contract Address
-    const response = await fetch(`https://api.opensea.io/api/v1/asset_contract/${contractAddress}`);
-    const data = await response.json();
+        // รายการ Collection ที่ต้องการซ่อน (แก้ไขได้ง่าย)
+        const hiddenCollections = [
+          "# UP $5,000 TO $50,000",
+          "[ #175 ] Scan the QR to get a reward",
+          "! [#] AutoETH 1483"
+        ];
+    // กรอง NFT ที่ไม่ต้องการให้แสดง โดยใช้ hiddenCollections
+    const filteredNFTs = nftDetails.filter(nft => !hiddenCollections.includes(nft.collection));
     
-    // คืนค่าชื่อ Collection หรือ "Unknown Collection" หากไม่พบข้อมูล
-    return data.collection?.name || "Unknown Collection";
+    return filteredNFTs;
   } catch (error) {
-    console.error("Failed to fetch collection name from OpenSea:", error); // ถ้าเกิดข้อผิดพลาด
-    return "Unknown Collection"; // คืนค่าชื่อ Collection ที่ไม่พบ
+    console.error("Failed to fetch NFTs", error);
+    return [];
   }
 };

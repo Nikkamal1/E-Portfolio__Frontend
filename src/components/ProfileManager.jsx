@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Layout from "./Layout";
 
 const ProfileManager = ({ walletAddress, onProfileComplete = () => {} }) => {
   const [profileImage, setProfileImage] = useState("");
@@ -16,32 +15,15 @@ const ProfileManager = ({ walletAddress, onProfileComplete = () => {} }) => {
   const [toastMessage, setToastMessage] = useState("");
   const navigate = useNavigate();
 
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith("image/")) {
-        setToastMessage("Please upload a valid image file.");
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        setToastMessage("Please upload an image smaller than 5MB.");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => setProfileImage(reader.result);
-      reader.onerror = () => {
-        setToastMessage("Failed to read the image file.");
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
+  // ฟังก์ชันบันทึกโปรไฟล์
   const submitProfile = async (profileData) => {
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:5000/api/profile", profileData);
+      const response = await axios.post("http://47.129.238.41:3000/api/profile", profileData);
       setToastMessage("Your profile has been saved successfully.");
       onProfileComplete(response.data);
+      window.location.reload();
     } catch (error) {
       console.error("Error saving profile:", error);
       setToastMessage("There was an error saving your profile.");
@@ -50,16 +32,15 @@ const ProfileManager = ({ walletAddress, onProfileComplete = () => {} }) => {
     }
   };
 
+  // ตรวจสอบข้อมูลก่อนบันทึก
   const handleSubmit = () => {
-    if (!name.trim() || !bio.trim() || !education.trim() || !workExperience.trim()) {
-      setToastMessage("Please complete all fields to continue.");
+    if (!name.trim()) {
+      setToastMessage("Please enter your name to continue.");
       return;
     }
-
     submitProfile({
       name,
       bio,
-      image: profileImage,
       education,
       workExperience,
       skills,
@@ -69,115 +50,104 @@ const ProfileManager = ({ walletAddress, onProfileComplete = () => {} }) => {
     });
   };
 
+  // ฟังก์ชันเมื่อกดปุ่ม Cancel
+  const handleCancel = () => {
+    navigate("/");
+  };
+
   return (
-    <Layout>
-    <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8 space-y-6">
-      {/* Profile Image */}
-      {/* <div className="w-24 h-24 mx-auto rounded-full overflow-hidden">
-        <img src={profileImage || "/placeholder.svg"} alt="Profile Picture" />
-      </div> */}
+    <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+      <h1 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+        Complete Your Profile
+      </h1>
 
-      {/* Image Upload */}
-      {/* <input
-        type="file"
-        accept="image/*"
-        onChange={handleImageChange}
-        className="w-full border p-2 mt-4"
-        aria-label="Upload Profile Picture"
-      /> */}
+      {/* ฟอร์มข้อมูลโปรไฟล์ */}
+      <div className="grid grid-cols-1 gap-4">
+        <input
+          type="text"
+          placeholder="Enter your name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full border p-3 rounded-md focus:ring-blue-500 focus:border-blue-500"
+        />
 
-      {/* Name Input */}
-      <input
-        type="text"
-        placeholder="Enter your name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="w-full border p-2 mt-4 rounded-md"
-        aria-label="Name"
-      />
+        <textarea
+          placeholder="Tell us about yourself"
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
+          className="w-full border p-3 rounded-md resize-none h-24 focus:ring-blue-500 focus:border-blue-500"
+        />
 
-      {/* Bio Textarea */}
-      <textarea
-        placeholder="Tell us about yourself"
-        value={bio}
-        onChange={(e) => setBio(e.target.value)}
-        className="w-full border p-2 mt-4 resize-none h-24 rounded-md"
-        aria-label="Bio"
-      />
+        <input
+          type="text"
+          placeholder="Enter your education details"
+          value={education}
+          onChange={(e) => setEducation(e.target.value)}
+          className="w-full border p-3 rounded-md focus:ring-blue-500 focus:border-blue-500"
+        />
 
-      {/* Education Input */}
-      <input
-        type="text"
-        placeholder="Enter your education details"
-        value={education}
-        onChange={(e) => setEducation(e.target.value)}
-        className="w-full border p-2 mt-4 rounded-md"
-        aria-label="Education"
-      />
+        <textarea
+          placeholder="Enter your work experience"
+          value={workExperience}
+          onChange={(e) => setWorkExperience(e.target.value)}
+          className="w-full border p-3 rounded-md resize-none h-24 focus:ring-blue-500 focus:border-blue-500"
+        />
 
-      {/* Work Experience Input */}
-      <input
-        type="text"
-        placeholder="Enter your work experience"
-        value={workExperience}
-        onChange={(e) => setWorkExperience(e.target.value)}
-        className="w-full border p-2 mt-4 rounded-md"
-        aria-label="Work Experience"
-      />
+        <input
+          type="text"
+          placeholder="Enter your skills"
+          value={skills}
+          onChange={(e) => setSkills(e.target.value)}
+          className="w-full border p-3 rounded-md focus:ring-blue-500 focus:border-blue-500"
+        />
 
-      {/* Skills Input */}
-      <input
-        type="text"
-        placeholder="Enter your skills"
-        value={skills}
-        onChange={(e) => setSkills(e.target.value)}
-        className="w-full border p-2 mt-4 rounded-md"
-        aria-label="Skills"
-      />
+        <input
+          type="text"
+          placeholder="Enter your portfolio links"
+          value={portfolio}
+          onChange={(e) => setPortfolio(e.target.value)}
+          className="w-full border p-3 rounded-md focus:ring-blue-500 focus:border-blue-500"
+        />
 
-      {/* Portfolio Input */}
-      <input
-        type="text"
-        placeholder="Enter your portfolio links"
-        value={portfolio}
-        onChange={(e) => setPortfolio(e.target.value)}
-        className="w-full border p-2 mt-4 rounded-md"
-        aria-label="Portfolio"
-      />
-
-      {/* Awards Input */}
-      <input
-        type="text"
-        placeholder="Enter any awards you've received"
-        value={awards}
-        onChange={(e) => setAwards(e.target.value)}
-        className="w-full border p-2 mt-4 rounded-md"
-        aria-label="Awards"
-      />
-
-      {/* Wallet Address Display */}
-      <div className="text-gray-500 mt-4">
-        <strong>Wallet Address:</strong>
-        <p className="truncate bg-gray-100 p-2 rounded-md">{walletAddress}</p>
+        <input
+          type="text"
+          placeholder="Enter any awards you've received"
+          value={awards}
+          onChange={(e) => setAwards(e.target.value)}
+          className="w-full border p-3 rounded-md focus:ring-blue-500 focus:border-blue-500"
+        />
       </div>
 
-      {/* Submit Button */}
-      <button
-        onClick={handleSubmit}
-        disabled={loading}
-        className="w-full bg-primary text-white py-2 mt-4 rounded-md hover:bg-primary/90"
-      >
-        {loading ? "Saving..." : "Complete Profile"}
-      </button>
+      {/* แสดง Wallet Address */}
+      <div className="text-gray-500 mt-4 text-sm">
+        <strong>Wallet Address:</strong>
+        <p className="truncate bg-gray-100 p-3 rounded-md">{walletAddress}</p>
+      </div>
+
+      {/* ปุ่ม Cancel และ Save */}
+      <div className="mt-6 flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0">
+        <button
+          onClick={handleCancel}
+          className="w-full sm:w-auto px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          className="w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+        >
+          {loading ? "Saving..." : "Complete Profile"}
+        </button>
+      </div>
 
       {/* Toast Message */}
       {toastMessage && (
-        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-md">
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg">
           <p>{toastMessage}</p>
         </div>
       )}
     </div>
-    </Layout>
   );
 };
 
